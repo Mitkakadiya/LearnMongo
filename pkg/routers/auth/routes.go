@@ -6,6 +6,7 @@ import (
 )
 
 func Route(app *fiber.App) {
-	route := app.Group("auth")
+	route := app.Group("/auth")
 	route.Post("/login", controllers.Login)
+	route.Delete("/delete/:id", controllers.DeleteUser)
 }

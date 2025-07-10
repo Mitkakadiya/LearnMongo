@@ -11,6 +11,7 @@ import (
 )
 
 var DB *mongo.Client
+var UserCollection *mongo.Collection
 
 func ConnectDB() {
 	dsn := os.Getenv("DATABASE_URL")
@@ -29,6 +30,7 @@ func ConnectDB() {
 	}
 
 	DB = client
+	UserCollection = DB.Database("Testing").Collection("Users")
 
 	fmt.Println("Connected to MongoDB!")
 }

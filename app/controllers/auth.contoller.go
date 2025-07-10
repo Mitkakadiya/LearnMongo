@@ -36,15 +36,14 @@ func Login(c *fiber.Ctx) error {
 
 	var user models.User
 
-	collection := config.DB.Database("Testing").Collection("Users")
-	if err := collection.FindOne(context.Background(), models.User{Mobile: loginInput.Mobile, CountryCode: loginInput.CountryCode}).Decode(&user); err != nil {
+	if err := config.UserCollection.FindOne(context.Background(), models.User{Mobile: loginInput.Mobile, CountryCode: loginInput.CountryCode}).Decode(&user); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			var newUser = models.User{
 				Mobile:      loginInput.Mobile,
 				CountryCode: loginInput.CountryCode,
 			}
 
-			if _, err := collection.InsertOne(context.Background(), newUser); err != nil {
+			if _, err := config.UserCollection.InsertOne(context.Background(), newUser); err != nil {
 				return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 					"status":  http.StatusBadRequest,
 					"message": "Error while inserting user",
@@ -65,7 +64,7 @@ func Login(c *fiber.Ctx) error {
 				"expired_at": time.Time.UnixMilli(time.Now()) + (5 * 60 * 1000),
 			},
 		}
-		if _, err := collection.UpdateOne(context.Background(), bson.M{"mobile": loginInput.Mobile}, updateUser); err != nil {
+		if _, err := config.UserCollection.UpdateOne(context.Background(), bson.M{"mobile": loginInput.Mobile}, updateUser); err != nil {
 			fmt.Println(err.Error())
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 				"status":  http.StatusBadRequest,
@@ -79,5 +78,33 @@ func Login(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(fiber.Map{
 		"status":  http.StatusCreated,
 		"message": "OTP sent successfully",
+	})
+}
+
+func DeleteUser(c *fiber.Ctx) error {
+	paramsId := c.Params("id")
+	if paramsId == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"status":  http.StatusBadRequest,
+			"message": "Please provide valid id",
+		})
+	}
+	oid, err := bson.ObjectIDFromHex(paramsId)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"status":  http.StatusBadRequest,
+			"message": "Please provide valid id",
+		})
+	}
+	if _, err := config.UserCollection.DeleteOne(context.Background(), bson.M{"_id": oid}); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"status":  http.StatusBadRequest,
+			"message": "Error while deleting user",
+		})
+	}
+
+	return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+		"status":  http.StatusOK,
+		"message": "delete User Successfully",
 	})
 }
