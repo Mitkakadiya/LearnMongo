@@ -10,7 +10,6 @@ import (
 	"mongo_db/app/models"
 	"mongo_db/config"
 	"mongo_db/pkg/validators"
-	"net/http"
 	"os"
 	"time"
 )
@@ -20,16 +19,16 @@ func Login(c *fiber.Ctx) error {
 	var loginInput models.LoginInput
 
 	if err := c.BodyParser(&loginInput); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"status":  http.StatusBadRequest,
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
 			"message": "Please provide valid mobile number and phone code",
 		})
 	}
 
 	if err := validators.ValidateStruct(&loginInput); err != nil {
 		fmt.Println(err)
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"status": http.StatusBadRequest,
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status": fiber.StatusBadRequest,
 			"error":  err,
 		})
 	}
@@ -44,14 +43,14 @@ func Login(c *fiber.Ctx) error {
 			}
 
 			if _, err := config.UserCollection.InsertOne(context.Background(), newUser); err != nil {
-				return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-					"status":  http.StatusBadRequest,
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"status":  fiber.StatusBadRequest,
 					"message": "Error while inserting user",
 				})
 			}
 		} else {
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-				"status":  http.StatusBadRequest,
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
 				"message": "Error while inserting user",
 			})
 		}
@@ -66,8 +65,8 @@ func Login(c *fiber.Ctx) error {
 		}
 		if _, err := config.UserCollection.UpdateOne(context.Background(), bson.M{"mobile": loginInput.Mobile}, updateUser); err != nil {
 			fmt.Println(err.Error())
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-				"status":  http.StatusBadRequest,
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
 				"message": "Error while updating user",
 			})
 		}
@@ -75,8 +74,8 @@ func Login(c *fiber.Ctx) error {
 
 	}
 
-	return c.Status(http.StatusCreated).JSON(fiber.Map{
-		"status":  http.StatusCreated,
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"status":  fiber.StatusCreated,
 		"message": "OTP sent successfully",
 	})
 }
@@ -84,27 +83,27 @@ func Login(c *fiber.Ctx) error {
 func DeleteUser(c *fiber.Ctx) error {
 	paramsId := c.Query("id")
 	if paramsId == "" {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"status":  http.StatusBadRequest,
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
 			"message": "Please provide valid id",
 		})
 	}
 	oid, err := bson.ObjectIDFromHex(paramsId)
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"status":  http.StatusBadRequest,
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
 			"message": "Please provide valid id",
 		})
 	}
 	if _, err := config.UserCollection.DeleteOne(context.Background(), bson.M{"_id": oid}); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"status":  http.StatusBadRequest,
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
 			"message": "Error while deleting user",
 		})
 	}
 
-	return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-		"status":  http.StatusOK,
+	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		"status":  fiber.StatusOK,
 		"message": "delete User Successfully",
 	})
 }

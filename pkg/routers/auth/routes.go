@@ -11,4 +11,5 @@ func Route(app *fiber.App) {
 	route.Delete("/delete/:id", controllers.DeleteUser)
 	route.Post("/email", controllers.EmailVerify)
 	route.Get("/email/verify", controllers.TokenVerification)
+	route.Get("/users", controllers.GetUsers)
 }
