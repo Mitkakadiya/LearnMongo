@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"mongo_db/app/models"
 	"mongo_db/config"
 	"mongo_db/pkg/utills"
@@ -35,11 +36,16 @@ func EmailVerify(c *fiber.Ctx) error {
 		})
 	}
 
-	var emailVerification = models.EmailVerification{}
-	emailVerification.Email = inputEmail.Email
-	emailVerification.EmailVerificationToken = token
-
-	if _, err := config.EmailCollection.InsertOne(context.Background(), &emailVerification); err != nil {
+	filter := bson.M{"email": inputEmail.Email}
+	update := bson.M{
+		"$set": bson.M{
+			"email":                    inputEmail.Email,
+			"email_verification_token": token,
+			"is_verified":              false,
+		},
+	}
+	opts := options.UpdateOne().SetUpsert(true)
+	if _, err := config.EmailCollection.UpdateOne(context.Background(), filter, update, opts); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   fiber.StatusBadRequest,
 			"message": "Enter valid email",
