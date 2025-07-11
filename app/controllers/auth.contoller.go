@@ -82,7 +82,7 @@ func Login(c *fiber.Ctx) error {
 }
 
 func DeleteUser(c *fiber.Ctx) error {
-	paramsId := c.Params("id")
+	paramsId := c.Query("id")
 	if paramsId == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"status":  http.StatusBadRequest,

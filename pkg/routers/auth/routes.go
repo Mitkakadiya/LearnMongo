@@ -9,4 +9,6 @@ func Route(app *fiber.App) {
 	route := app.Group("/auth")
 	route.Post("/login", controllers.Login)
 	route.Delete("/delete/:id", controllers.DeleteUser)
+	route.Post("/email", controllers.EmailVerify)
+	route.Get("/email/verify", controllers.TokenVerification)
 }
